@@ -5,8 +5,8 @@ API REST do e-commerce **Shio** em Django 5 + DRF, com autenticação JWT, login
 ## Visão Geral
 
 - **Stack:** Python 3.12, Django 5.0, Django REST Framework, PostgreSQL, drf-spectacular
-- **Arquitetura:** apps DDD com camadas `Model → Serializer → Service → View`
-- **Apps atuais:** `authentication`, `shared`, `notifications`, `products`
+- **Arquitetura:** modular monolith — app único `base/` com sub-pacotes por domínio (`models/`, `services/`, `serializers/`, `views/`, `admin/`)
+- **Camadas:** `Model → Serializer → Service → View`
 - **Docs vivos:** [`docs/plano-arquitetura.md`](docs/plano-arquitetura.md) (roadmap, decisões, checklist)
 
 ## Pré-requisitos
@@ -72,6 +72,22 @@ docker compose exec backend black --check .
 # Instalar pacote novo no container (precisa de -u root)
 docker compose exec -u root backend pip install <pacote>
 ```
+
+## Dados de exemplo (seed)
+
+Em **desenvolvimento**, o seed roda automaticamente a cada `docker compose up`, apagando e recriando os dados de catálogo:
+
+Para rodar manualmente:
+
+```bash
+# popular sem apagar o que já existe
+docker compose exec backend python manage.py seed
+
+# apagar tudo e recriar do zero
+docker compose exec backend python manage.py seed --reset
+```
+
+> O seed **nunca roda em produção** (`DEBUG=False`). Em prod os dados são gerenciados pelo painel admin.
 
 ## Documentação da API (Swagger / OpenAPI)
 
@@ -150,8 +166,6 @@ docker compose exec backend python manage.py send_test_email <to> --template WEL
 - **Dev:** `FileSystemStorage` em `media/`
 - **Prod:** `R2MediaStorage` (Cloudflare R2 via `django-storages[s3]`)
 
-A classe está em `core/storages.py:R2MediaStorage` e é aplicada por field (ex: `ImageField(storage=R2MediaStorage())`).
-
 ## Testes
 
 ```bash
@@ -161,23 +175,28 @@ make test-cov     # gera htmlcov/index.html
 
 `pytest-django` + `factory_boy` configurados. Factories ficam em cada app em `tests/factories.py`.
 
-## Estrutura de Apps
+## Estrutura do projeto
 
 ```
 backend/
-├── core/                # settings, urls, wsgi, storages
-│   ├── settings/        # base.py | dev.py | prod.py
-│   └── storages.py      # R2MediaStorage
-├── shared/              # TimestampedModel, permissions, exceptions, /api/health/
-├── authentication/      # User custom + Google OAuth + JWT
-├── notifications/       # EmailLog + NotificationService + templates de e-mail
-├── products/            # Catalog atual (renomeado para `catalog/` na Fase 1)
-├── docs/                # Documentação viva do projeto
+├── core/                    # settings, urls, wsgi, storages
+│   ├── settings/            # base.py | dev.py | prod.py
+│   └── storages.py          # R2MediaStorage (Cloudflare R2)
+├── base/                    # app único — todos os domínios
+│   ├── models/              # authentication, catalog, inventory, notifications, shared
+│   ├── serializers/         # catalog, inventory, authentication, shared
+│   ├── services/            # authentication, catalog, inventory, notifications
+│   ├── views/               # authentication, catalog, inventory, health
+│   ├── admin/               # painel Django Admin
+│   ├── signals/             # post_save: cria Stock para cada novo Product
+│   ├── tests/               # factories + testes por domínio
+│   └── management/commands/ # initadmin, seed, send_test_email
+├── docs/                    # Documentação viva do projeto
 ├── docker-compose.yml
 ├── Dockerfile
-├── entrypoint.sh        # migrate + initadmin + runserver
+├── entrypoint.sh            # migrate → initadmin → seed (dev) → runserver/gunicorn
 ├── Makefile
-├── pyproject.toml       # ruff + black + pytest
+├── pyproject.toml           # ruff + black + pytest + coverage
 └── requirements.txt
 ```
 

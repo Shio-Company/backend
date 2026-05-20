@@ -8,9 +8,7 @@ from drf_spectacular.views import (
 
 urlpatterns = [
     path("admin/", admin.site.urls),
-    path("api/auth/", include("authentication.urls", namespace="authentication")),
-    path("api/", include("shared.urls")),
-    path("api/products/", include("products.urls")),
+    path("api/", include("base.urls", namespace="base")),
 ]
 
 urlpatterns += [

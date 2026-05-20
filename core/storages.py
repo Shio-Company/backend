@@ -16,7 +16,7 @@ class R2MediaStorage(S3Boto3Storage):
     default_acl = None  # R2 não usa ACLs S3-style
     file_overwrite = False  # nunca sobrescrever arquivo existente
     querystring_auth = False  # URLs públicas sem assinatura
-    location = "products/"  # prefixo dentro do bucket
+    location = "catalog/"  # prefixo dentro do bucket
 
     def __init__(self, *args, **kwargs):
         kwargs.setdefault("bucket_name", settings.R2_BUCKET_NAME)

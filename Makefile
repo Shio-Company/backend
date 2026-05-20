@@ -1,17 +1,18 @@
 DC_EXEC = docker compose exec backend
 
-.PHONY: install test test-cov lint format migrate makemigrations run shell check schema-validate ci help
+.PHONY: install test test-cov lint format migrate makemigrations run rebuild shell check schema-validate ci help
 
 help:
 	@echo "Targets disponíveis:"
-	@echo "  install          Instala dependências no container"
+	@echo "  rebuild          Derruba, reconstrói a imagem e sobe (use após mudar requirements)"
+	@echo "  run              Sobe sem rebuildar (quando a imagem já está atualizada)"
+	@echo "  install          Instala dependências no container em execução"
 	@echo "  test             Roda pytest -v com coverage"
 	@echo "  test-cov         Gera relatório HTML de coverage"
 	@echo "  lint             Verifica ruff + black (sem alterar)"
 	@echo "  format           Formata com black e corrige com ruff --fix"
 	@echo "  migrate          Aplica migrations pendentes"
 	@echo "  makemigrations   Gera migrations para mudanças nos models"
-	@echo "  run              Sobe o servidor de desenvolvimento"
 	@echo "  shell            Abre o Django shell interativo"
 	@echo "  check            Roda python manage.py check"
 	@echo "  schema-validate  Valida schema OpenAPI (CI gate)"
@@ -39,6 +40,10 @@ migrate:
 
 makemigrations:
 	$(DC_EXEC) python manage.py makemigrations
+
+rebuild:
+	docker compose down
+	docker compose up --build
 
 run:
 	docker compose up

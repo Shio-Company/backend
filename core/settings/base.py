@@ -35,20 +35,18 @@ INSTALLED_APPS = [
     "django.contrib.messages",
     "django.contrib.admin",
     "django.contrib.staticfiles",
-    "authentication",
-    "shared",
-    "notifications",
-    "products",
+    "base",
     "rest_framework",
     "rest_framework_simplejwt",
     "rest_framework_simplejwt.token_blacklist",
     "corsheaders",
     "drf_spectacular",
+    "django_filters",
     "whitenoise.runserver_nostatic",
 ]
 
 # Authentication
-AUTH_USER_MODEL = "authentication.User"
+AUTH_USER_MODEL = "base.User"
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
@@ -216,7 +214,7 @@ LOGGING = {
         },
     },
     "loggers": {
-        "authentication": {
+        "base": {
             "handlers": ["console"],
             "level": "INFO",
             "propagate": True,
@@ -235,7 +233,7 @@ SPECTACULAR_SETTINGS = {
         "3. Clique em **Authorize** (cadeado) e cole: `Bearer <access_token>`\n\n"
         "O access token expira em **1 hora**. Use `POST /api/auth/token/refresh/` para renovar."
     ),
-    "VERSION": "1.0.0",
+    "VERSION": "1.1.0",
     "SERVE_INCLUDE_SCHEMA": False,
     # Segurança — define o esquema JWT para o botão Authorize do Swagger UI
     "SECURITY": [{"BearerAuth": []}],
@@ -263,6 +261,18 @@ SPECTACULAR_SETTINGS = {
         {
             "name": "Products",
             "description": "Catálogo de produtos e gestão de inventário.",
+        },
+        {
+            "name": "Catalog",
+            "description": "Catálogo público: drops, categorias e produtos.",
+        },
+        {
+            "name": "Admin - Catalog",
+            "description": "Gestão de drops, categorias e produtos (staff).",
+        },
+        {
+            "name": "Admin - Inventory",
+            "description": "Ajuste de estoque (staff).",
         },
         {
             "name": "Users",

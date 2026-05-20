@@ -1,6 +1,6 @@
 import pytest
 
-from authentication.tests.factories import UserFactory
+from base.tests.factories import UserFactory
 
 
 @pytest.fixture(autouse=True)

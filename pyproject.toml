@@ -19,7 +19,7 @@ ignore = [
 
 [tool.pytest.ini_options]
 DJANGO_SETTINGS_MODULE = "core.settings.dev"
-addopts = "--reuse-db --cov=. --cov-report=term-missing --no-cov-on-fail"
+addopts = "--reuse-db --cov=. --cov-report=term-missing --no-cov-on-fail --cov-fail-under=80"
 python_files = ["test_*.py"]
 python_classes = ["Test*"]
 python_functions = ["test_*"]

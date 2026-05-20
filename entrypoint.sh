@@ -8,7 +8,11 @@ python manage.py migrate --noinput
 echo 'Creating superuser...'
 python manage.py initadmin
 
-if [ "$DEBUG" = "True" ] || [ "$DEBUG" = "true" ] || [ "$DEBUG" = "1" ]; then
+DJANGO_DEBUG=$(python manage.py shell -c "from django.conf import settings; print(settings.DEBUG)" 2>/dev/null)
+
+if [ "$DJANGO_DEBUG" = "True" ]; then
+    echo 'Seeding database...'
+    python manage.py seed --reset
     exec python manage.py runserver 0.0.0.0:${PORT:-8000}
 fi
 
