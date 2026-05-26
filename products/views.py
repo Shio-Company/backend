@@ -10,7 +10,7 @@ from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from authentication.permissions import IsAdminRole
+from authentication.permissions import IsStaffOrSuperuser
 
 from .models import Category, Product
 from .serializers import CategorySerializer
@@ -38,7 +38,7 @@ class CategoryListCreateView(APIView):
 
     def get_permissions(self):
         if self.request.method == "POST":
-            return [IsAdminRole()]
+            return [IsStaffOrSuperuser()]
         return [AllowAny()]
 
     @extend_schema(
@@ -58,7 +58,7 @@ class CategoryListCreateView(APIView):
         tags=["Categories"],
         summary="Criar categoria",
         description=(
-            "Cria uma nova categoria. Requer perfil ADMIN.\n\n"
+            "Cria uma nova categoria. Requer permissão de administrador.\n\n"
             "O `slug` é gerado automaticamente a partir do `name` se não for enviado."
         ),
         request=CategorySerializer,
@@ -66,7 +66,7 @@ class CategoryListCreateView(APIView):
             201: CategorySerializer,
             400: OpenApiResponse(description="Dados inválidos (ex: nome duplicado)."),
             401: OpenApiResponse(description="Não autenticado."),
-            403: OpenApiResponse(description="Não autorizado — requer perfil ADMIN."),
+            403: OpenApiResponse(description="Não autorizado — requer permissão de administrador."),
         },
     )
     def post(self, request):
@@ -90,7 +90,7 @@ class CategoryDetailView(APIView):
     def get_permissions(self):
         if self.request.method == "GET":
             return [AllowAny()]
-        return [IsAdminRole()]
+        return [IsStaffOrSuperuser()]
 
     def _get_object(self, pk):
         return get_object_or_404(Category, pk=pk)
@@ -110,7 +110,7 @@ class CategoryDetailView(APIView):
         tags=["Categories"],
         summary="Atualizar categoria (PUT)",
         description=(
-            "Substitui os dados da categoria. Requer perfil ADMIN.\n\n"
+            "Substitui os dados da categoria. Requer permissão de administrador.\n\n"
             "Se `name` mudar e `slug` não for enviado, o slug é regenerado a partir do novo `name`."
         ),
         request=CategorySerializer,
@@ -118,7 +118,7 @@ class CategoryDetailView(APIView):
             200: CategorySerializer,
             400: OpenApiResponse(description="Dados inválidos."),
             401: OpenApiResponse(description="Não autenticado."),
-            403: OpenApiResponse(description="Não autorizado — requer perfil ADMIN."),
+            403: OpenApiResponse(description="Não autorizado — requer permissão de administrador."),
             404: OpenApiResponse(description="Categoria não encontrada."),
         },
     )
@@ -140,7 +140,7 @@ class CategoryDetailView(APIView):
         responses={
             204: OpenApiResponse(description="Categoria removida."),
             401: OpenApiResponse(description="Não autenticado."),
-            403: OpenApiResponse(description="Não autorizado — requer perfil ADMIN."),
+            403: OpenApiResponse(description="Não autorizado — requer permissão de administrador."),
             404: OpenApiResponse(description="Categoria não encontrada."),
         },
     )

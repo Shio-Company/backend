@@ -22,9 +22,9 @@ User = get_user_model()
 # ─── Helpers ──────────────────────────────────────────────────────────────────
 
 
-def make_user(email, role=UserRole.CUSTOMER, name="User"):
+def make_user(email, role=UserRole.CUSTOMER, name="User", is_staff=False):
     """Cria um utilizador com perfil associado para uso nos testes."""
-    user = User.objects.create_user(email=email, name=name)
+    user = User.objects.create_user(email=email, name=name, is_staff=is_staff)
     UserProfile.objects.create(user=user, role=role)
     return user
 
@@ -44,7 +44,7 @@ class CategoryListCreateTests(APITestCase):
     url = "/api/products/categories/"
 
     def setUp(self):
-        self.admin = make_user("admin@x.com", role=UserRole.ADMIN, name="Admin")
+        self.admin = make_user("admin@x.com", role=UserRole.ADMIN, name="Admin", is_staff=True)
         self.customer = make_user("c@x.com", role=UserRole.CUSTOMER, name="Cliente")
         Category.objects.create(name="Camisetas", slug="camisetas")
         Category.objects.create(name="Bonés", slug="bones")
@@ -112,7 +112,7 @@ class CategoryDetailTests(APITestCase):
     """Testes para GET/PUT/DELETE /api/products/categories/{id}/."""
 
     def setUp(self):
-        self.admin = make_user("admin@x.com", role=UserRole.ADMIN, name="Admin")
+        self.admin = make_user("admin@x.com", role=UserRole.ADMIN, name="Admin", is_staff=True)
         self.customer = make_user("c@x.com", role=UserRole.CUSTOMER, name="Cliente")
         self.category = Category.objects.create(name="Camisetas", slug="camisetas")
         self.url = f"/api/products/categories/{self.category.id}/"
