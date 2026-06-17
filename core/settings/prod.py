@@ -58,10 +58,11 @@ else:
     _media_backend = "django.core.files.storage.FileSystemStorage"
 
 STORAGES = {
-    # Enable WhiteNoise's GZip and Brotli compression of static assets:
-    # https://whitenoise.readthedocs.io/en/latest/django.html#add-compression-and-caching-support
+    # TolerantManifestStaticFilesStorage resolve o bug do WhiteNoise com
+    # @import url() relativo no CSS do Django Admin (forms.css → widgets.css).
+    # Ver: core/storage.py
     "staticfiles": {
-        "BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage",
+        "BACKEND": "core.storage.TolerantManifestStaticFilesStorage",
     },
     "default": {
         "BACKEND": _media_backend,
