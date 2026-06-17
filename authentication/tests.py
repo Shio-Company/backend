@@ -221,6 +221,27 @@ class MeViewTests(APITestCase):
         response = self.client.get(self.url)
         self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
 
+    def test_patch_updates_phone_and_cpf(self):
+        """Deve atualizar o telefone e CPF do utilizador autenticado."""
+        self.client.credentials(HTTP_AUTHORIZATION=f"Bearer {self.access_token}")
+
+        response = self.client.patch(
+            self.url,
+            {
+                "phone_number": "61999999999",
+                "cpf": "12345678910",
+            },
+            format="json",
+        )
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.json()["phone_number"], "61999999999")
+        self.assertEqual(response.json()["cpf"], "12345678910")
+
+        self.user.refresh_from_db()
+        self.assertEqual(self.user.profile.phone_number, "61999999999")
+        self.assertEqual(self.user.profile.cpf, "12345678910")
+
 
 class TokenRefreshViewTests(APITestCase):
     """Testes para o endpoint POST /api/auth/token/refresh/."""

@@ -2,7 +2,7 @@ from rest_framework import serializers
 
 from orders.models import CustomerOrder
 
-from .models import User
+from .models import User, UserProfile
 
 
 class UserSerializer(serializers.ModelSerializer):
@@ -29,6 +29,20 @@ class UserSerializer(serializers.ModelSerializer):
             "updated_at",
         ]
         read_only_fields = ["id", "email", "created_at", "updated_at"]
+
+    def update(self, instance, validated_data):
+        profile_data = validated_data.pop("profile", {})
+        instance = super().update(instance, validated_data)
+
+        if profile_data:
+            profile, _ = UserProfile.objects.get_or_create(user=instance)
+            if "phone_number" in profile_data:
+                profile.phone_number = profile_data.get("phone_number")
+            if "cpf" in profile_data:
+                profile.cpf = profile_data.get("cpf")
+            profile.save()
+
+        return instance
 
 
 class GoogleAuthSerializer(serializers.Serializer):
