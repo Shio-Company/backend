@@ -34,6 +34,8 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.admin",
+    "cloudinary_storage",
+    "cloudinary",
     "django.contrib.staticfiles",
     "authentication",
     "products",
@@ -143,6 +145,14 @@ STATIC_ROOT = BASE_DIR / "staticfiles"
 
 MEDIA_URL = "media/"
 MEDIA_ROOT = BASE_DIR / "mediafiles"
+
+# Cloudinary — armazenamento de media em produção (vazio em dev usa FileSystemStorage)
+CLOUDINARY_STORAGE = {
+    "CLOUD_NAME": config("CLOUDINARY_CLOUD_NAME", default=""),
+    "API_KEY": config("CLOUDINARY_API_KEY", default=""),
+    "API_SECRET": config("CLOUDINARY_API_SECRET", default=""),
+    "SECURE": True,
+}
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.0/ref/settings/#default-auto-field
