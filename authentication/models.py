@@ -94,6 +94,15 @@ class User(AbstractUser):
     def __str__(self):
         return f"{self.name} <{self.email}>"
 
+    @property
+    def is_admin(self):
+        """Indica se o utilizador tem um perfil administrativo no sistema."""
+        if self.is_staff or self.is_superuser:
+            return True
+
+        profile = getattr(self, "profile", None)
+        return profile is not None and profile.role == UserRole.ADMIN
+
     def get_full_name(self):
         return self.name
 

@@ -8,7 +8,7 @@ from .models import User
 class CustomUserCreationForm(UserCreationForm):
     class Meta:
         model = User
-        fields = ("email", "name")
+        fields = ("email", "name", "is_active", "is_staff", "is_superuser")
 
 
 class CustomUserChangeForm(UserChangeForm):
@@ -77,7 +77,15 @@ class UserAdmin(BaseUserAdmin):
             None,
             {
                 "classes": ("wide",),
-                "fields": ("email", "name", "password1", "password2"),
+                "fields": (
+                    "email",
+                    "name",
+                    "password1",
+                    "password2",
+                    "is_active",
+                    "is_staff",
+                    "is_superuser",
+                ),
             },
         ),
     )

@@ -611,7 +611,7 @@ class OrderTrackingView(APIView):
         )
 
     def get_order_if_user_has_permission(self, user, order_id):
-        if user.is_staff or user.is_superuser:
+        if getattr(user, "is_admin", False):
             return CustomerOrder.objects.filter(id=order_id).first()
         return CustomerOrder.objects.filter(id=order_id, user=user).first()
 

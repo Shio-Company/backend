@@ -7,6 +7,7 @@ Executar com:
     pytest authentication/tests.py -v
 """
 
+from types import SimpleNamespace
 from unittest.mock import patch
 
 from django.contrib.auth import get_user_model
@@ -15,6 +16,7 @@ from rest_framework import status
 from rest_framework.test import APITestCase
 from rest_framework_simplejwt.tokens import RefreshToken
 
+from .models import UserProfile, UserRole
 from .services import GoogleAuthService, InvalidGoogleTokenException
 
 User = get_user_model()
@@ -271,6 +273,75 @@ class TokenRefreshViewTests(APITestCase):
         """Deve retornar 401 para um token inválido."""
         response = self.client.post(self.url, {"refresh": "token-falso"}, format="json")
         self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
+
+
+class AuthModelTests(TestCase):
+    def test_is_admin_true_for_staff(self):
+        user = User.objects.create_user(
+            email="staff@example.com",
+            name="Staff User",
+            is_staff=True,
+        )
+        self.assertTrue(user.is_admin)
+
+    def test_is_admin_true_for_superuser(self):
+        user = User.objects.create_superuser(
+            email="super@example.com",
+            name="Super User",
+            password="test1234",
+        )
+        self.assertTrue(user.is_admin)
+
+    def test_is_admin_true_for_role_admin(self):
+        user = User.objects.create_user(
+            email="roleadmin@example.com",
+            name="Role Admin",
+        )
+        UserProfile.objects.create(user=user, role=UserRole.ADMIN)
+        self.assertTrue(user.is_admin)
+
+    def test_is_admin_false_for_customer(self):
+        user = User.objects.create_user(
+            email="customer@example.com",
+            name="Customer User",
+        )
+        UserProfile.objects.create(user=user, role=UserRole.CUSTOMER)
+        self.assertFalse(user.is_admin)
+
+
+class PermissionTests(TestCase):
+    def test_staff_user_has_admin_permission(self):
+        user = User.objects.create_user(
+            email="staffperm@example.com",
+            name="Staff Perm",
+            is_staff=True,
+        )
+        request = SimpleNamespace(user=user)
+        from authentication.permissions import IsStaffOrSuperUser
+
+        self.assertTrue(IsStaffOrSuperUser().has_permission(request, None))
+
+    def test_admin_role_user_has_admin_permission(self):
+        user = User.objects.create_user(
+            email="roleperm@example.com",
+            name="Role Perm",
+        )
+        UserProfile.objects.create(user=user, role=UserRole.ADMIN)
+        request = SimpleNamespace(user=user)
+        from authentication.permissions import IsStaffOrSuperUser
+
+        self.assertTrue(IsStaffOrSuperUser().has_permission(request, None))
+
+    def test_customer_user_does_not_have_admin_permission(self):
+        user = User.objects.create_user(
+            email="customerperm@example.com",
+            name="Customer Perm",
+        )
+        UserProfile.objects.create(user=user, role=UserRole.CUSTOMER)
+        request = SimpleNamespace(user=user)
+        from authentication.permissions import IsStaffOrSuperUser
+
+        self.assertFalse(IsStaffOrSuperUser().has_permission(request, None))
 
 
 class LogoutViewTests(APITestCase):
