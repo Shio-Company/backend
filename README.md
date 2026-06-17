@@ -74,6 +74,48 @@ O container já executa as migrações e cria o administrador automaticamente.
 - `GOOGLE_CLIENT_ID`: client ID do OAuth do Google usado para validar `id_token`.
 - `ADMIN_NAME`, `ADMIN_PASS`, `ADMIN_EMAIL`: credenciais para o superusuário inicial.
 
+## Integração com os Correios
+
+As funcionalidades de frete (preço/prazo), consulta de CEP, busca de agências,
+pré-postagem (despacho) e rastreio usam a API dos Correios, que exige um contrato
+comercial com cartão de postagem.
+
+Variáveis de ambiente:
+
+- `CORREIOS_MOCK_ENABLED`: quando `True`, todas as chamadas aos Correios retornam
+  dados simulados, sem acesso à rede. Use enquanto o contrato/credenciais não
+  estiverem disponíveis. O valor padrão é `False`.
+- `CORREIOS_API_BASE_URL`: host base da API. Produção: `https://api.correios.com.br`.
+  Homologação: `https://apihom.correios.com.br`.
+- `CORREIOS_USERNAME`: login de acesso ao Meu Correios / CWS.
+- `CORREIOS_PASSWORD`: código de acesso da API gerado no CWS (não é a senha de login).
+- `CORREIOS_CARTAO_POSTAGEM`: número do cartão de postagem do contrato.
+
+### Modo mock
+
+Com `CORREIOS_MOCK_ENABLED=True`, o fluxo de checkout, pagamento e despacho funciona
+de ponta a ponta sem credenciais. Os códigos de rastreio gerados nesse modo são
+fictícios (ex.: `AA123456785BR`) e não existem nos Correios.
+
+### Deploy em produção (Railway)
+
+As variáveis de ambiente são definidas no painel do Railway, em **Variables**
+(o arquivo `.env` é apenas local e não vai para produção).
+
+- Mantenha `CORREIOS_MOCK_ENABLED` como `False` (ou não defina a variável) para não
+  subir dados simulados em produção.
+- Quando o contrato estiver disponível, defina no painel:
+
+  ```
+  CORREIOS_MOCK_ENABLED=False
+  CORREIOS_API_BASE_URL=https://api.correios.com.br
+  CORREIOS_USERNAME=<login do CWS produção>
+  CORREIOS_PASSWORD=<código de acesso da API>
+  CORREIOS_CARTAO_POSTAGEM=<número do cartão>
+  ```
+
+  Após salvar, o Railway faz o redeploy automaticamente.
+
 ## Google Auth
 
 A autenticação Google é feita em `POST /api/auth/google/`.

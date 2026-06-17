@@ -188,6 +188,9 @@ INFINITEPAY_HANDLE = config("INFINITEPAY_HANDLE", default="")
 CORREIOS_API_BASE_URL = config(
     "CORREIOS_API_BASE_URL", default="https://api.correios.com.br"
 )
+# Quando True, todas as chamadas aos Correios retornam dados simulados (sem rede).
+# Use em dev/demo enquanto as credenciais reais não estão disponíveis.
+CORREIOS_MOCK_ENABLED = config("CORREIOS_MOCK_ENABLED", default=False, cast=bool)
 CORREIOS_USERNAME = config("CORREIOS_USERNAME", default="")
 CORREIOS_PASSWORD = config("CORREIOS_PASSWORD", default="")
 CORREIOS_CARTAO_POSTAGEM = config("CORREIOS_CARTAO_POSTAGEM", default="")
