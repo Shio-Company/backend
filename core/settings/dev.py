@@ -23,3 +23,13 @@ DATABASES = {
         "PORT": config("DB_PORT", cast=int),
     }
 }
+
+# Storages — em dev sempre usa disco local; Cloudinary só entra em prod.py
+STORAGES = {
+    "staticfiles": {
+        "BACKEND": "django.contrib.staticfiles.storage.StaticFilesStorage",
+    },
+    "default": {
+        "BACKEND": "django.core.files.storage.FileSystemStorage",
+    },
+}

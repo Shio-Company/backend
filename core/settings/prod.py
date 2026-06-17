@@ -29,6 +29,34 @@ DATABASES = {
     ),
 }
 
+# Static files finders — garante que o admin (contrib) e apps instaladas
+# sejam descobertos pelo collectstatic + WhiteNoise em produção.
+# AppDirectoriesFinder: varre <app>/static/ de cada INSTALLED_APP
+# FileSystemFinder:     varre os caminhos declarados em STATICFILES_DIRS
+STATICFILES_FINDERS = [
+    "django.contrib.staticfiles.finders.FileSystemFinder",
+    "django.contrib.staticfiles.finders.AppDirectoriesFinder",
+]
+
+# Cloudinary — usa armazenamento na nuvem apenas se credenciais estiverem preenchidas.
+# Caso contrário cai no FileSystemStorage (útil em deploys sem Cloudinary ainda configurado).
+_cloudinary_cloud_name = config("CLOUDINARY_CLOUD_NAME", default="")
+_cloudinary_api_key = config("CLOUDINARY_API_KEY", default="")
+_cloudinary_api_secret = config("CLOUDINARY_API_SECRET", default="")
+
+_use_cloudinary = all([_cloudinary_cloud_name, _cloudinary_api_key, _cloudinary_api_secret])
+
+if _use_cloudinary:
+    _media_backend = "cloudinary_storage.storage.MediaCloudinaryStorage"
+else:
+    import warnings
+    warnings.warn(
+        "Cloudinary credentials not set. Falling back to FileSystemStorage for media. "
+        "Set CLOUDINARY_CLOUD_NAME, CLOUDINARY_API_KEY and CLOUDINARY_API_SECRET in .env.",
+        stacklevel=1,
+    )
+    _media_backend = "django.core.files.storage.FileSystemStorage"
+
 STORAGES = {
     # Enable WhiteNoise's GZip and Brotli compression of static assets:
     # https://whitenoise.readthedocs.io/en/latest/django.html#add-compression-and-caching-support
@@ -36,7 +64,7 @@ STORAGES = {
         "BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage",
     },
     "default": {
-        "BACKEND": "cloudinary_storage.storage.MediaCloudinaryStorage",
+        "BACKEND": _media_backend,
     },
 }
 
