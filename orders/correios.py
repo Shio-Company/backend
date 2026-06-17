@@ -6,6 +6,8 @@ import requests
 from django.conf import settings
 from django.core.cache import cache
 
+from . import correios_mock
+
 logger = logging.getLogger(__name__)
 
 CORREIOS_TOKEN_CACHE_KEY = "correios_access_token"
@@ -49,6 +51,9 @@ def calculate_token_ttl_in_seconds(expires_at_iso: str) -> int:
 
 
 def request_new_correios_access_token() -> str:
+    if settings.CORREIOS_MOCK_ENABLED:
+        return correios_mock.mock_token_response()
+
     username = settings.CORREIOS_USERNAME
     password = settings.CORREIOS_PASSWORD
     cartao_postagem = settings.CORREIOS_CARTAO_POSTAGEM
@@ -87,6 +92,9 @@ def get_valid_correios_access_token() -> str:
 
 
 def fetch_tracking_data_from_correios(tracking_code: str) -> dict:
+    if settings.CORREIOS_MOCK_ENABLED:
+        return correios_mock.mock_tracking_response(tracking_code)
+
     token = get_valid_correios_access_token()
     url = CORREIOS_TRACKING_ENDPOINT.format(codigo_objeto=tracking_code)
     headers = {
@@ -237,6 +245,9 @@ def extract_tracking_code_from_prepostagem_response(data: dict) -> str | None:
 
 
 def fetch_prepostagem_details_from_correios(prepostagem_id: str) -> dict:
+    if settings.CORREIOS_MOCK_ENABLED:
+        return correios_mock.mock_prepostagem_details_response()
+
     token = get_valid_correios_access_token()
     url = CORREIOS_PREPOSTAGEM_DETAILS_ENDPOINT.format(id=prepostagem_id)
     headers = {"Authorization": f"Bearer {token}", "Accept": "application/json"}
@@ -254,6 +265,9 @@ def fetch_prepostagem_details_from_correios(prepostagem_id: str) -> dict:
 
 
 def create_prepostagem_at_correios(order) -> dict:
+    if settings.CORREIOS_MOCK_ENABLED:
+        return correios_mock.mock_prepostagem_response()
+
     token = get_valid_correios_access_token()
     payload = build_prepostagem_payload_for_order(order)
     headers = {
@@ -287,6 +301,9 @@ def create_prepostagem_at_correios(order) -> dict:
 
 
 def fetch_address_data_by_cep(cep: str) -> dict:
+    if settings.CORREIOS_MOCK_ENABLED:
+        return correios_mock.mock_cep_response(cep.replace("-", "").strip())
+
     token = get_valid_correios_access_token()
     url = CORREIOS_CEP_ENDPOINT.format(cep=cep.replace("-", "").strip())
     headers = {"Authorization": f"Bearer {token}", "Accept": "application/json"}
@@ -320,6 +337,9 @@ def format_cep_address_response(raw_data: dict) -> dict:
 def fetch_shipping_deadline_by_service_and_ceps(
     codigo_servico: str, cep_origem: str, cep_destino: str
 ) -> dict:
+    if settings.CORREIOS_MOCK_ENABLED:
+        return correios_mock.mock_prazo_response()
+
     token = get_valid_correios_access_token()
     url = CORREIOS_PRAZO_ENDPOINT.format(codigo_servico=codigo_servico)
     headers = {"Authorization": f"Bearer {token}", "Accept": "application/json"}
@@ -350,6 +370,9 @@ def fetch_shipping_price_by_service_and_ceps(
     altura: str = "20",
     vl_declarado: str = "0",
 ) -> dict:
+    if settings.CORREIOS_MOCK_ENABLED:
+        return correios_mock.mock_preco_response(peso_gramas)
+
     token = get_valid_correios_access_token()
     url = CORREIOS_PRECO_ENDPOINT.format(codigo_servico=codigo_servico)
     headers = {"Authorization": f"Bearer {token}", "Accept": "application/json"}
@@ -390,6 +413,9 @@ def format_shipping_options_response(prazo_data: dict, preco_data: dict) -> dict
 def fetch_agencies_by_city_and_state(
     municipio: str, uf: str, page: int = 0, size: int = 10
 ) -> dict:
+    if settings.CORREIOS_MOCK_ENABLED:
+        return correios_mock.mock_agencies_response()
+
     token = get_valid_correios_access_token()
     headers = {"Authorization": f"Bearer {token}", "Accept": "application/json"}
     params = {
