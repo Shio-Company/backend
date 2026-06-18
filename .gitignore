@@ -211,4 +211,7 @@ secret.json
 schema.yml
 mediafiles/*
 !mediafiles/.gitkeep
-**/chrome_profile_teste/
+scripts/populate_db.py
+selenium_tests/chrome_profile_teste/
+testandoAPIS.md
+.DS_STORE

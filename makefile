@@ -1,4 +1,4 @@
-DC_EXEC = docker compose exec backend
+DC_EXEC = docker compose exec backend 
 
 .PHONY: install test test-cov show-cov lint format migrate makemigrations run shell check schema-validate ci help ci-cov
 
@@ -55,7 +55,7 @@ check:
 	$(DC_EXEC) python manage.py check
 
 schema-validate:
-	$(DC_EXEC) python manage.py spectacular --validate --fail-on-warn --file /tmp/schema.yaml
+	docker exec -it shio_api python manage.py spectacular --validate --fail-on-warn --file /tmp/schema.yaml
 
 ci: lint test schema-validate 
 

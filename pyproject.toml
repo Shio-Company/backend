@@ -16,3 +16,4 @@ known-first-party = ["authentication", "core", "products", "orders"]
 DJANGO_SETTINGS_MODULE = "core.settings.test"
 python_files = ["tests.py", "test_*.py", "*_tests.py"]
 addopts = "--tb=short"
+norecursedirs = "selenium_tests"
