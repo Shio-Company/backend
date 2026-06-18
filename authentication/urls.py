@@ -2,6 +2,8 @@ from django.urls import path
 from rest_framework.routers import DefaultRouter
 
 from .views import (
+    AddressDetailView,
+    AddressListCreateView,
     CustomerCRMViewSet,
     GoogleLoginView,
     LogoutView,
@@ -23,6 +25,10 @@ urlpatterns = [
     path("logout/", LogoutView.as_view(), name="logout"),
     # GET - Retorna dados do utilizador autenticado
     path("me/", MeView.as_view(), name="me"),
+    # GET/POST - Lista e cria endereços do utilizador
+    path("addresses/", AddressListCreateView.as_view(), name="addresses"),
+    # PATCH/DELETE - Atualiza ou remove um endereço específico
+    path("addresses/<uuid:pk>/", AddressDetailView.as_view(), name="address-detail"),
 ]
 
 urlpatterns += router.urls
