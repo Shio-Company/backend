@@ -2,7 +2,7 @@ from rest_framework import serializers
 
 from orders.models import CustomerOrder
 
-from .models import User, UserProfile
+from .models import Address, User, UserProfile
 
 
 class UserSerializer(serializers.ModelSerializer):
@@ -82,6 +82,24 @@ class LogoutInputSerializer(serializers.Serializer):
             "Após este pedido, o token fica na blacklist e não pode mais ser usado."
         ),
     )
+
+
+class AddressSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Address
+        fields = [
+            "id",
+            "title",
+            "zip_code",
+            "street",
+            "address_number",
+            "complement",
+            "neighborhood",
+            "city",
+            "state",
+            "is_default",
+        ]
+        read_only_fields = ["id"]
 
 
 class CustomerOrderHistorySerializer(serializers.ModelSerializer):

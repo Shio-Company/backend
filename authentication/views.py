@@ -20,6 +20,7 @@ from authentication.signals import google_login_completed
 
 from .permissions import IsStaffOrSuperUser
 from .serializers import (
+    AddressSerializer,
     CustomerCRMDetailSerializer,
     CustomerCRMSerializer,
     GoogleAuthSerializer,
@@ -396,6 +397,52 @@ class MeView(APIView):
             )
 
         return Response(UserSerializer(user).data, status=status.HTTP_200_OK)
+
+
+class AddressListCreateView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        addresses = request.user.addresses.all().order_by("-is_default", "-created_at")
+        return Response(AddressSerializer(addresses, many=True).data)
+
+    def post(self, request):
+        serializer = AddressSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        if serializer.validated_data.get("is_default"):
+            request.user.addresses.filter(is_default=True).update(is_default=False)
+
+        address = serializer.save(user=request.user)
+        return Response(AddressSerializer(address).data, status=status.HTTP_201_CREATED)
+
+
+class AddressDetailView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get_object(self, request, pk):
+        return request.user.addresses.filter(id=pk).first()
+
+    def patch(self, request, pk):
+        address = self.get_object(request, pk)
+        if not address:
+            return Response({"message": "Endereço não encontrado."}, status=status.HTTP_404_NOT_FOUND)
+
+        serializer = AddressSerializer(address, data=request.data, partial=True)
+        serializer.is_valid(raise_exception=True)
+
+        if serializer.validated_data.get("is_default"):
+            request.user.addresses.filter(is_default=True).update(is_default=False)
+
+        serializer.save()
+        return Response(serializer.data)
+
+    def delete(self, request, pk):
+        address = self.get_object(request, pk)
+        if not address:
+            return Response({"message": "Endereço não encontrado."}, status=status.HTTP_404_NOT_FOUND)
+        address.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
 
 
 class CustomerCRMViewSet(viewsets.ReadOnlyModelViewSet):
