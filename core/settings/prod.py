@@ -18,6 +18,11 @@ CORS_ALLOWED_ORIGINS = config("CORS_ALLOWED_ORIGINS", default="", cast=Csv())
 SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
 SECURE_SSL_REDIRECT = True
 
+# Session cookie — SameSite=None permite enviar o cookie em requisições cross-origin
+# (frontend Vercel → backend Railway). Secure=True é obrigatório quando SameSite=None.
+SESSION_COOKIE_SAMESITE = "None"
+SESSION_COOKIE_SECURE = True
+
 # Database
 # https://docs.djangoproject.com/en/4.2/ref/settings/#databases
 
