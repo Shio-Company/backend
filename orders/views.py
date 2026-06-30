@@ -162,6 +162,44 @@ class AdminDashboardView(APIView):
         )
 
 
+class UserOrderListView(APIView):
+    """
+    GET /api/orders/my-orders/
+    Lista os pedidos do utilizador autenticado.
+    """
+
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        qs = (
+            CustomerOrder.objects.filter(user=request.user)
+            .select_related("user")
+            .order_by("-created_at")
+        )
+        data = DashboardRecentOrderSerializer(qs, many=True).data
+        return Response(data, status=status.HTTP_200_OK)
+
+
+class UserOrderDetailView(APIView):
+    """
+    GET /api/orders/my-orders/<order_id>/
+    Detalha um pedido pertencente ao utilizador autenticado.
+    """
+
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request, order_id):
+        try:
+            order = (
+                CustomerOrder.objects.select_related("user", "address", "payment")
+                .prefetch_related("items__variation__product")
+                .get(id=order_id, user=request.user)
+            )
+        except CustomerOrder.DoesNotExist:
+            return Response({"message": "Pedido não encontrado."}, status=404)
+        return Response(OrderDetailSerializer(order).data, status=status.HTTP_200_OK)
+
+
 class AdminOrderListView(APIView):
     """
     GET /api/orders/admin/
@@ -849,3 +887,5 @@ class CartItemDetailAPIView(APIView):
         return Response(
             CartRepresentationSerializer(cart_data).data, status=status.HTTP_200_OK
         )
+
+

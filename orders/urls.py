@@ -12,6 +12,8 @@ from .views import (
     OrderDispatchView,
     OrderTrackingView,
     PaymentSuccessRedirectView,
+    UserOrderDetailView,
+    UserOrderListView,
 )
 
 app_name = "orders"
@@ -23,6 +25,12 @@ urlpatterns = [
         "pagamento-sucesso/",
         PaymentSuccessRedirectView.as_view(),
         name="payment-success",
+    ),
+    path("my-orders/", UserOrderListView.as_view(), name="user_orders_list"),
+    path(
+        "my-orders/<uuid:order_id>/",
+        UserOrderDetailView.as_view(),
+        name="user_orders_detail",
     ),
     path("admin/", AdminOrderListView.as_view(), name="admin_orders_list"),
     path(
